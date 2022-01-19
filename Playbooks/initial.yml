@@ -1,0 +1,16 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: create the 'ngtrks' user
+      user: name=ngtrks append=yes state=present createhome=yes shell=/bin/bash
+
+    - name: allow 'ngtrks' to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        line: 'ngtrks ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: set up authorized keys for the ngtrks user
+      authorized_key: user=ngtrks key="{{item}}"
+      with_file:
+        - ~/.ssh/id_rsa.pub
